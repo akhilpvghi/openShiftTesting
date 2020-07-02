@@ -121,7 +121,7 @@ async def distribute_cards(bluffw,no_of_deck):
     await send_cards_to_client(get_card_distribution_to_player)
 
 
-start_server = websockets.serve(counter, port=6443)
+start_server = websockets.serve(counter, port=8080)
 
 asyncio.get_event_loop().run_until_complete(start_server)
 asyncio.get_event_loop().run_forever()
