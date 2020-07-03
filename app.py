@@ -114,8 +114,8 @@ async def counter(websocket, path):
             else:
                 logging.error("unsupported event: {}".format(data))
                 #print("data------------> {}".format(data))
-    # except:
-    #     print("error in main thread")
+    except:
+        print("error in main thread")
     finally:
         print("hello")
         #await unregister(websocket)
