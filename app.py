@@ -11,6 +11,7 @@ playerDictionaryWithNames={}
 USERS = set()
 
 
+
 def state_event():
     return json.dumps({"type": "state", **STATE})
 
@@ -37,6 +38,12 @@ async def register(websocket):
     await notify_users()
 
 
+async def close_all_connection(bluffw):
+    print("close all connection called")
+    USERS.clear()
+    del bluffw
+    await notify_users()
+    
 async def unregister(websocket):
     USERS.remove(websocket)
     await notify_users()
@@ -88,8 +95,11 @@ async def counter(websocket, path):
                 playerDictionaryWithNames.update({str(data["playerNumber"]):data["userName"]})
                 bluffw = bluff(len(USERS))
                 STATE["value"] += 1
-                if data["no_of_deck"]!='undefined':
+                if data["no_of_deck"]!='close' and data["no_of_deck"]!='undefined':
                     no_of_deck=int(data["no_of_deck"])
+                elif data["no_of_deck"]=='close':
+                    await close_all_connection(bluffw)
+                    break
                 else:
                     no_of_deck=1
                 await distribute_cards(bluffw, no_of_deck)
@@ -105,7 +115,7 @@ async def counter(websocket, path):
                 logging.error("unsupported event: {}".format(data))
                 #print("data------------> {}".format(data))
     # except:
-    #     print("error")
+    #     print("error in main thread")
     finally:
         print("hello")
         #await unregister(websocket)
@@ -121,7 +131,7 @@ async def distribute_cards(bluffw,no_of_deck):
     await send_cards_to_client(get_card_distribution_to_player)
 
 
-start_server = websockets.serve(counter, port=8080)
+start_server = websockets.serve(counter, port=1234)
 
 asyncio.get_event_loop().run_until_complete(start_server)
 asyncio.get_event_loop().run_forever()
